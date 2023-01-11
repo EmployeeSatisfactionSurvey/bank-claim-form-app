@@ -1,0 +1,226 @@
+export const schema = {
+  title: 'Bank claim form',
+  description: 'Ask a question or make a claim',
+  showProgressBar: 'top',
+  progressBarType: 'buttons',
+  pages: [
+    {
+      name: 'yourRequest',
+      navigationTitle: 'Your request',
+      navigationDescription: 'Tell us what is your request',
+      showQuestionNumbers: 'off',
+      elements: [
+        {
+          type: 'radiogroup',
+          name: 'requestType',
+          title: 'What is your request ?',
+          colCount: 1,
+          choices: ['Ask a question', 'Make a claim'],
+          isRequired: true,
+        },
+        {
+          type: 'radiogroup',
+          name: 'clientOrNot',
+          title: 'What is your relation with our bank ?',
+          colCount: 1,
+          choices: ['I am a client', 'I am not a client'],
+          isRequired: true,
+        },
+      ],
+    },
+    {
+      name: 'applicantDetails',
+      navigationTitle: 'Applicant details',
+      navigationDescription: 'Tell us about you',
+      showQuestionNumbers: 'off',
+      visibleIf:
+        '{requestType}="Ask a question" || ({requestType}="Make a claim" && {clientOrNot}="I am a client")',
+      elements: [
+        {
+          type: 'radiogroup',
+          name: 'civility',
+          title: 'Civility',
+          choices: ['Mrs', 'Ms'],
+          colCount: 2,
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'firstName',
+          title: 'First Name',
+          startWithNewLine: false,
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'lastName',
+          title: 'Last Name',
+          startWithNewLine: false,
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'phone',
+          title: 'Telephone number',
+          inputType: 'tel',
+          isRequired: true,
+          validators: [
+            {
+              type: 'regex',
+              regex: '\\+[0–9]{1} \\([0–9]{3}\\) [0–9]{3}-[0–9]{2}-[0–9]{2}',
+              text: 'Phone number must be in the following format: +0 (000) 000–00–00',
+            },
+          ],
+        },
+        {
+          type: 'text',
+          name: 'email',
+          title: 'Email',
+          inputType: 'email',
+          startWithNewLine: false,
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'address',
+          title: 'Address',
+          visibleIf: '{clientOrNot}="I am a client"',
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'city',
+          title: 'City',
+          visibleIf: '{clientOrNot}="I am a client"',
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'postalCode',
+          title: 'Postal code',
+          inputType: 'number',
+          visibleIf: '{clientOrNot}="I am a client"',
+          isRequired: true,
+        },
+      ],
+    },
+    {
+      name: 'bankDetails',
+      navigationTitle: 'Bank details',
+      navigationDescription: 'Give us your account details',
+      showQuestionNumbers: 'off',
+      visibleIf: '{clientOrNot}="I am a client"',
+      elements: [
+        {
+          type: 'text',
+          name: 'accountHolderName',
+          title: 'Account holder name',
+          isRequired: true,
+        },
+        {
+          type: 'text',
+          name: 'iban',
+          title: 'Account number (IBAN)',
+          isRequired: true,
+          validators: [
+            {
+              type: 'regex',
+              text: 'Please enter a valid bank account number',
+              regex: '^[0-9]{9,18}$',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'yourQuestion',
+      navigationTitle: 'Ask your question',
+      showQuestionNumbers: 'off',
+      visibleIf: '{requestType}="Ask a question"',
+      elements: [
+        {
+          type: 'checkbox',
+          name: 'questionType',
+          title: 'Your question is about : ',
+          choices: [
+            'Request information about services',
+            'Account types',
+            'Weekly working time',
+            'Other',
+          ],
+          isRequired: true,
+        },
+        {
+          type: 'comment',
+          name: 'question',
+          title: 'Details of your question',
+          isRequired: true,
+        },
+      ],
+    },
+    {
+      name: 'yourClaim',
+      navigationTitle: 'Your claim',
+      navigationDescription: 'You can add multiple invoices',
+      showQuestionNumbers: 'off',
+      visibleIf:
+        '{requestType}="Make a claim" && {clientOrNot}="I am a client"',
+      elements: [
+        {
+          type: 'paneldynamic',
+          name: 'invoices',
+          title: 'Invoices',
+          keyName: 'position',
+          showQuestionNumbers: 'off',
+          templateTitle: 'Invoice #{panelIndex}',
+          minPanelCount: 1,
+          panelAddText: 'Add another invoice',
+          panelRemoveText: 'Remove invoice',
+          templateElements: [
+            {
+              type: 'text',
+              name: 'transactionDate',
+              title: 'Date of Transaction',
+              inputType: 'date',
+              isRequired: true,
+            },
+            {
+              type: 'text',
+              name: 'transactionAmount',
+              title: 'Transaction Amount',
+              inputType: 'number',
+              isRequired: true,
+            },
+            {
+              type: 'comment',
+              name: 'comment',
+              title: 'A brief description of the issue',
+              isRequired: true,
+            },
+            {
+              type: 'file',
+              name: 'invoiceFile',
+              title: 'Supporting documentation (file)',
+              showPreview: true,
+              maxSize: 102400,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'alertPage',
+      navigationTitle: 'Your are not a customer',
+      showQuestionNumbers: 'off',
+      visibleIf:
+        '{requestType}="Make a claim" && {clientOrNot}="I am not a client"',
+      elements: [
+        {
+          type: 'html',
+          name: 'alert',
+          html: 'Sorry, you are <b>not a customer for our bank</b> you can not make a claim !!',
+        },
+      ],
+    },
+  ],
+};
